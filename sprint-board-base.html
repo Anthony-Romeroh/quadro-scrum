@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Board</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f8f6;
+    --bg2: #ffffff;
+    --bg3: #f1efe8;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #9a9994;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --blue: #185fa5; --blue-bg: #e6f1fb; --blue-text: #0c447c;
+    --green: #0f6e56; --green-bg: #e1f5ee; --green-text: #085041;
+    --red: #a32d2d; --red-bg: #fcebeb; --red-text: #791f1f;
+    --amber: #854f0b; --amber-bg: #faeeda; --amber-text: #633806;
+    --purple: #534ab7; --purple-bg: #eeedfe; --purple-text: #3c3489;
+    --gray-bg: #f1efe8; --gray-text: #444441;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18; --bg2: #222220; --bg3: #2a2a28;
+      --text: #e8e6dc; --text2: #9a9994; --text3: #6a6965;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --blue-bg: #0c447c; --blue-text: #b5d4f4;
+      --green-bg: #085041; --green-text: #9fe1cb;
+      --red-bg: #791f1f; --red-text: #f7c1c1;
+      --amber-bg: #633806; --amber-text: #fac775;
+      --purple-bg: #3c3489; --purple-text: #cecbf6;
+      --gray-bg: #444441; --gray-text: #d3d1c7;
+    }
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .top-left h1 { font-size: 18px; font-weight: 500; }
+  .top-left .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .sprint-input { font-size: 18px; font-weight: 500; background: none; border: none; color: var(--text); outline: none; width: 300px; }
+  .sprint-input:focus { border-bottom: 1.5px solid var(--blue); }
+  .top-right { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font-size: 12px; padding: 6px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text2); cursor: pointer; transition: background .15s; }
+  .btn:hover { background: var(--bg3); }
+  .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-primary:hover { opacity: .9; }
+
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .stat { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 6px 12px; font-size: 12px; color: var(--text2); }
+  .stat b { color: var(--text); font-weight: 500; }
+
+  .columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 768px) { .columns { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .columns { grid-template-columns: 1fr; } }
+
+  .col { background: var(--bg3); border-radius: var(--radius-lg); padding: 10px; min-height: 220px; transition: border .15s; }
+  .col.drag-over { border: 1.5px dashed var(--border2); }
+  .col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+  .col-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+  .col-todo .col-title { color: var(--text2); }
+  .col-doing .col-title { color: var(--blue); }
+  .col-done .col-title { color: var(--green); }
+  .col-debug .col-title { color: var(--red); }
+  .col-badge { font-size: 11px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 99px; padding: 1px 7px; color: var(--text2); }
+
+  .cards { display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+
+  .card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: grab; transition: border-color .15s, opacity .15s; position: relative; }
+  .card:hover { border-color: var(--border2); }
+  .card.dragging { opacity: .35; cursor: grabbing; }
+  .col-debug .card { border-left: 2.5px solid var(--red); border-radius: 0 var(--radius) var(--radius) 0; }
+  .col-done .card { border-left: 2.5px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; }
+
+  .card-title { font-size: 12px; font-weight: 500; line-height: 1.4; margin-bottom: 6px; color: var(--text); }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 99px; font-weight: 500; }
+  .tag-bundle { background: var(--purple-bg); color: var(--purple-text); }
+  .tag-git    { background: var(--amber-bg);  color: var(--amber-text); }
+  .tag-infra  { background: var(--red-bg);    color: var(--red-text); }
+  .tag-motor  { background: var(--green-bg);  color: var(--green-text); }
+  .tag-docs   { background: var(--blue-bg);   color: var(--blue-text); }
+
+  .card-time { font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+  .card-time.active { color: var(--blue); }
+  .card-actions { display: flex; gap: 4px; }
+  .card-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 13px; padding: 1px 3px; border-radius: 4px; }
+  .card-btn:hover { color: var(--text); background: var(--bg3); }
+
+  .time-log { margin-top: 6px; border-top: 0.5px solid var(--border); padding-top: 6px; display: none; }
+  .time-log.open { display: block; }
+  .time-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--text2); padding: 1px 0; }
+  .time-row .col-name { text-transform: capitalize; }
+  .time-edit { font-size: 10px; background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 1px 4px; color: var(--text); width: 60px; }
+
+  .add-btn { width: 100%; margin-top: 8px; font-size: 11px; padding: 5px; border: 0.5px dashed var(--border); border-radius: var(--radius); background: none; color: var(--text3); cursor: pointer; text-align: center; }
+  .add-btn:hover { color: var(--text2); border-color: var(--border2); }
+  .add-form { margin-top: 8px; display: none; }
+  .add-form.open { display: block; }
+  .add-textarea { width: 100%; font-size: 12px; padding: 6px 8px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); resize: none; font-family: inherit; }
+  .add-textarea:focus { outline: none; border-color: var(--blue); }
+  .add-row { display: flex; gap: 6px; margin-top: 6px; }
+  .add-select { font-size: 11px; padding: 4px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text2); }
+  .add-confirm { font-size: 11px; padding: 4px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); cursor: pointer; }
+  .add-confirm:hover { background: var(--bg3); }
+  .add-cancel { font-size: 11px; padding: 4px 8px; border: none; background: none; color: var(--text3); cursor: pointer; }
+
+  .empty { font-size: 11px; color: var(--text3); text-align: center; padding: 20px 0; }
+
+  .modal-wrap { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-wrap.open { display: flex; }
+  .modal { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 1.5rem; width: 90%; max-width: 680px; max-height: 80vh; overflow-y: auto; }
+  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .modal-close { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text2); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 6px 8px; font-weight: 500; color: var(--text2); border-bottom: 0.5px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  td { padding: 6px 8px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  .bar-wrap { background: var(--bg3); border-radius: 99px; height: 6px; width: 100%; }
+  .bar { height: 6px; border-radius: 99px; background: var(--blue); }
+  .bar.done { background: var(--green); }
+  .bar.debug { background: var(--red); }
+  .chart { margin-top: 1rem; }
+  .chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .chart-label { font-size: 11px; color: var(--text2); width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .chart-bar-wrap { flex: 1; background: var(--bg3); border-radius: 99px; height: 14px; }
+  .chart-bar { height: 14px; border-radius: 99px; background: var(--blue); min-width: 2px; transition: width .3s; }
+  .chart-val { font-size: 11px; color: var(--text2); width: 50px; text-align: right; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="top-left">
+      <input class="sprint-input" id="sprint-name" value="Bundle Roteirizacao - Sprint 1" placeholder="Nome da sprint...">
+      <div class="sub" id="sprint-dates"></div>
+    </div>
+    <div class="top-right">
+      <button class="btn" onclick="openReport()">&#9776; relatorio</button>
+      <button class="btn" onclick="exportJSON()">&#8595; exportar</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()">&#8593; importar</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn btn-primary" onclick="clearAll()">&#43; nova sprint</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="columns">
+    <div class="col col-todo" id="col-todo" ondragover="dragOver(event)" ondrop="drop(event,'todo')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">a fazer</span><span class="col-badge" id="badge-todo">0</span></div>
+      <div class="cards" id="cards-todo"></div>
+      <div id="form-todo">
+        <button class="add-btn" onclick="showForm('todo')">+ nova task</button>
+        <div class="add-form" id="addform-todo">
+          <textarea class="add-textarea" id="inp-todo" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-todo"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('todo')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('todo')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-doing" id="col-doing" ondragover="dragOver(event)" ondrop="drop(event,'doing')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">fazendo</span><span class="col-badge" id="badge-doing">0</span></div>
+      <div class="cards" id="cards-doing"></div>
+      <div id="form-doing">
+        <button class="add-btn" onclick="showForm('doing')">+ nova task</button>
+        <div class="add-form" id="addform-doing">
+          <textarea class="add-textarea" id="inp-doing" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-doing"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('doing')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('doing')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-done" id="col-done" ondragover="dragOver(event)" ondrop="drop(event,'done')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">feito</span><span class="col-badge" id="badge-done">0</span></div>
+      <div class="cards" id="cards-done"></div>
+      <div id="form-done">
+        <button class="add-btn" onclick="showForm('done')">+ nova task</button>
+        <div class="add-form" id="addform-done">
+          <textarea class="add-textarea" id="inp-done" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-done"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('done')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('done')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-debug" id="col-debug" ondragover="dragOver(event)" ondrop="drop(event,'debug')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">debug / erro</span><span class="col-badge" id="badge-debug">0</span></div>
+      <div class="cards" id="cards-debug"></div>
+      <div id="form-debug">
+        <button class="add-btn" onclick="showForm('debug')">+ novo erro</button>
+        <div class="add-form" id="addform-debug">
+          <textarea class="add-textarea" id="inp-debug" rows="2" placeholder="Descreve o erro..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-debug"><option value="tag-infra">infra</option><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('debug')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('debug')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="report-modal" onclick="if(event.target===this)closeReport()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReport()">&#215;</button>
+    <h2>Relatorio da sprint</h2>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<script>
+const COLS = ['todo','doing','done','debug'];
+const COL_LABELS = {todo:'a fazer', doing:'fazendo', done:'feito', debug:'debug/erro'};
+let state = { sprint: '', cards: {todo:[], doing:[], done:[], debug:[]}, createdAt: new Date().toISOString() };
+let dragCardId = null;
+let dragSrcCol = null;
+let ticker = null;
+
+function now() { return Date.now(); }
+function ms2h(ms) { return Math.round(ms / 3600000 * 10) / 10; }
+function ms2str(ms) {
+  if (!ms || ms <= 0) return '—';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
+}
+function totalTime(card) {
+  let total = 0;
+  const log = card.timeLog || {};
+  COLS.forEach(c => { total += (log[c] || 0); });
+  if (card.col === 'doing' && card.doingStart) total += (now() - card.doingStart);
+  return total;
+}
+
+function load() {
+  try {
+    const saved = localStorage.getItem('sprint-board-v2');
+    if (saved) state = JSON.parse(saved);
+  } catch(e) {}
+  document.getElementById('sprint-name').value = state.sprint || 'Sprint 1';
+  render();
+  startTicker();
+}
+
+function save() {
+  state.sprint = document.getElementById('sprint-name').value;
+  localStorage.setItem('sprint-board-v2', JSON.stringify(state));
+}
+
+function startTicker() {
+  if (ticker) clearInterval(ticker);
+  ticker = setInterval(() => {
+    document.querySelectorAll('.live-time').forEach(el => {
+      const id = parseInt(el.dataset.id);
+      const card = findCard(id);
+      if (card && card.col === 'doing' && card.doingStart) {
+        const elapsed = (now() - card.doingStart) + (card.timeLog && card.timeLog.doing ? card.timeLog.doing : 0);
+        el.textContent = ms2str(elapsed);
+      }
+    });
+  }, 30000);
+}
+
+function findCard(id) {
+  for (const col of COLS) {
+    const c = state.cards[col].find(x => x.id === id);
+    if (c) return {...c, col};
+  }
+  return null;
+}
+
+function render() {
+  COLS.forEach(col => {
+    const container = document.getElementById('cards-' + col);
+    container.innerHTML = '';
+    const list = state.cards[col] || [];
+    if (list.length === 0) {
+      container.innerHTML = '<div class="empty">vazio</div>';
+    } else {
+      list.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.draggable = true;
+        el.dataset.id = card.id;
+        const log = card.timeLog || {};
+        const isActive = col === 'doing' && card.doingStart;
+        const elapsed = isActive ? (now() - card.doingStart) + (log.doing || 0) : (log[col] || 0);
+        const total = totalTime({...card, col});
+        const timeStr = ms2str(elapsed > 0 ? elapsed : total);
+        const logRows = COLS.filter(c => (log[c] || 0) > 0 || (c === col && elapsed > 0)).map(c => {
+          const t = c === col && isActive ? elapsed : (log[c] || 0);
+          if (t <= 0) return '';
+          return `<div class="time-row"><span class="col-name">${COL_LABELS[c]}</span><input class="time-edit" type="text" value="${ms2str(t)}" onchange="editTime(${card.id},'${c}',this.value)" onclick="event.stopPropagation()"></div>`;
+        }).join('');
+        el.innerHTML = `
+          <div class="card-title">${card.title}</div>
+          <div class="card-footer">
+            <span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="card-time ${isActive ? 'active' : ''}" title="tempo nesta coluna">
+                &#9201; <span class="live-time" data-id="${card.id}">${timeStr}</span>
+              </span>
+              <div class="card-actions">
+                <button class="card-btn" onclick="toggleLog(${card.id})" title="ver historico de tempo">&#9776;</button>
+                <button class="card-btn" onclick="deleteCard(${card.id})" title="remover">&#215;</button>
+              </div>
+            </div>
+          </div>
+          <div class="time-log" id="log-${card.id}">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">historico de tempo (editavel)</div>
+            ${logRows || '<div style="font-size:10px;color:var(--text3)">sem registros</div>'}
+            <div class="time-row" style="margin-top:4px;border-top:0.5px solid var(--border);padding-top:4px">
+              <span style="font-weight:500">total</span>
+              <span style="font-weight:500">${ms2str(total)}</span>
+            </div>
+          </div>`;
+        el.addEventListener('dragstart', e => { dragCardId = card.id; dragSrcCol = col; el.classList.add('dragging'); });
+        el.addEventListener('dragend', () => el.classList.remove('dragging'));
+        container.appendChild(el);
+      });
+    }
+    document.getElementById('badge-' + col).textContent = list.length;
+  });
+  updateStats();
+  save();
+}
+
+function toggleLog(id) {
+  const el = document.getElementById('log-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function editTime(id, col, val) {
+  const card = state.cards[col] && state.cards[col].find(c => c.id === id);
+  if (!card) return;
+  const h = parseFloat(val);
+  if (!isNaN(h)) {
+    if (!card.timeLog) card.timeLog = {};
+    card.timeLog[col] = Math.round(h * 3600000);
+    save();
+  }
+}
+
+function updateStats() {
+  const total = COLS.reduce((s, c) => s + state.cards[c].length, 0);
+  const done = state.cards.done.length;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  const allTime = COLS.reduce((s, col) => {
+    return s + state.cards[col].reduce((ss, c) => ss + totalTime({...c, col}), 0);
+  }, 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat">total <b>${total}</b></div>
+    <div class="stat">feito <b>${done}</b></div>
+    <div class="stat">progresso <b>${pct}%</b></div>
+    <div class="stat">tempo total <b>${ms2str(allTime)}</b></div>
+    <div class="stat">debug <b>${state.cards.debug.length}</b></div>`;
+  const d = new Date(state.createdAt);
+  document.getElementById('sprint-dates').textContent = 'iniciada em ' + d.toLocaleDateString('pt-BR');
+}
+
+function addCard(col) {
+  const inp = document.getElementById('inp-' + col);
+  const tag = document.getElementById('tag-' + col).value;
+  const title = inp.value.trim();
+  if (!title) return;
+  const id = Date.now();
+  const card = { id, title, tag, timeLog: {}, createdAt: now() };
+  if (col === 'doing') card.doingStart = now();
+  state.cards[col].push(card);
+  inp.value = '';
+  hideForm(col);
+  render();
+}
+
+function deleteCard(id) {
+  if (!confirm('Remover esta task?')) return;
+  COLS.forEach(col => { state.cards[col] = state.cards[col].filter(c => c.id !== id); });
+  render();
+}
+
+function showForm(col) {
+  document.getElementById('addform-' + col).classList.add('open');
+  document.querySelector('#form-' + col + ' .add-btn').style.display = 'none';
+  document.getElementById('inp-' + col).focus();
+}
+
+function hideForm(col) {
+  document.getElementById('addform-' + col).classList.remove('open');
+  document.querySelector('#form-' + col + ' .add-btn').style.display = 'block';
+}
+
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function drop(e, targetCol) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragCardId || dragSrcCol === targetCol) { dragCardId = null; dragSrcCol = null; return; }
+  const idx = state.cards[dragSrcCol].findIndex(c => c.id === dragCardId);
+  if (idx === -1) return;
+  const card = state.cards[dragSrcCol].splice(idx, 1)[0];
+  const t = now();
+  if (!card.timeLog) card.timeLog = {};
+  if (dragSrcCol === 'doing' && card.doingStart) {
+    card.timeLog.doing = (card.timeLog.doing || 0) + (t - card.doingStart);
+    delete card.doingStart;
+  }
+  if (targetCol === 'doing') card.doingStart = t;
+  if (!card.timeLog[dragSrcCol]) card.timeLog[dragSrcCol] = 0;
+  state.cards[targetCol].push(card);
+  dragCardId = null; dragSrcCol = null;
+  render();
+}
+
+function openReport() {
+  const allCards = COLS.flatMap(col => state.cards[col].map(c => ({...c, col})));
+  if (allCards.length === 0) { alert('Nenhuma task ainda.'); return; }
+  const maxTime = Math.max(...allCards.map(c => totalTime(c)), 1);
+  const rows = allCards.sort((a,b) => totalTime(b) - totalTime(a)).map(card => {
+    const t = totalTime(card);
+    const pct = Math.round(t / maxTime * 100);
+    const barClass = card.col === 'done' ? 'done' : card.col === 'debug' ? 'debug' : '';
+    const log = card.timeLog || {};
+    const breakdown = COLS.filter(c => (log[c]||0) > 0).map(c => `${COL_LABELS[c]}: ${ms2str(log[c])}`).join(' | ') || '—';
+    return `<tr>
+      <td>${card.title}</td>
+      <td><span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span></td>
+      <td><span class="tag" style="background:var(--bg3);color:var(--text2)">${COL_LABELS[card.col]}</span></td>
+      <td>${ms2str(t)}</td>
+      <td style="min-width:80px"><div class="bar-wrap"><div class="bar ${barClass}" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  const chartRows = allCards.sort((a,b) => totalTime(b) - totalTime(a)).slice(0,10).map(card => {
+    const t = totalTime(card);
+    const pct = Math.round(t / maxTime * 100);
+    return `<div class="chart-row">
+      <div class="chart-label" title="${card.title}">${card.title}</div>
+      <div class="chart-bar-wrap"><div class="chart-bar" style="width:${pct}%"></div></div>
+      <div class="chart-val">${ms2str(t)}</div>
+    </div>`;
+  }).join('');
+
+  const totalDone = state.cards.done.length;
+  const totalAll = COLS.reduce((s,c) => s + state.cards[c].length, 0);
+  const totalTime2 = COLS.reduce((s,col) => s + state.cards[col].reduce((ss,c) => ss + totalTime({...c,col}),0), 0);
+
+  document.getElementById('report-content').innerHTML = `
+    <div class="stats" style="margin-bottom:1rem">
+      <div class="stat">tasks <b>${totalAll}</b></div>
+      <div class="stat">concluidas <b>${totalDone}</b></div>
+      <div class="stat">tempo total <b>${ms2str(totalTime2)}</b></div>
+      <div class="stat">erros <b>${state.cards.debug.length}</b></div>
+    </div>
+    <div class="chart" style="margin-bottom:1.5rem">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">top 10 por tempo</div>
+      ${chartRows}
+    </div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">todas as tasks</div>
+    <table>
+      <thead><tr><th>task</th><th>tag</th><th>coluna</th><th>tempo total</th><th>proporcao</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  document.getElementById('report-modal').classList.add('open');
+}
+
+function closeReport() { document.getElementById('report-modal').classList.remove('open'); }
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sprint-board-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      state = JSON.parse(ev.target.result);
+      document.getElementById('sprint-name').value = state.sprint || 'Sprint 1';
+      render();
+    } catch { alert('Arquivo invalido.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Criar nova sprint? Os dados atuais serao perdidos.')) return;
+  state = { sprint: 'Nova sprint', cards: {todo:[], doing:[], done:[], debug:[]}, createdAt: new Date().toISOString() };
+  document.getElementById('sprint-name').value = 'Nova sprint';
+  render();
+}
+
+document.getElementById('sprint-name').addEventListener('input', save);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeReport();
+  if (e.key === 'Enter' && !e.shiftKey) {
+    COLS.forEach(col => {
+      const inp = document.getElementById('inp-' + col);
+      if (document.activeElement === inp) { e.preventDefault(); addCard(col); }
+    });
+  }
+});
+
+load();
+</script>
+</body>
+</html>

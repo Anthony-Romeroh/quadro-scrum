@@ -1,0 +1,221 @@
+{
+  "sprint": "Print in House - Sprint 1",
+  "cards": {
+    "todo": [
+      {
+        "id": 1,
+        "title": "TS-01 Definir tecnologia Power Apps ou Python depende licenca M365",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 2,
+        "title": "TS-02 Mapear perfis de usuarios e permissoes promotor vendedor supervisor backoffice",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 3,
+        "title": "TS-03 Definir fonte de dados dos clientes ERP CRM DW API ou tabela de origem",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 4,
+        "title": "TS-04 Definir onde os dados serao armazenados Dataverse SharePoint SQL Delta Table",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 5,
+        "title": "TS-05 Definir storage de arquivos fotos e logos Azure Blob SharePoint",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 6,
+        "title": "TS-06 Modelar tabela de solicitacoes Fachada campos e schema",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 7,
+        "title": "TS-07 Modelar tabela de solicitacoes Kit Frio campos e schema",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 8,
+        "title": "TS-08 Definir ciclo de vida do status Rascunho Enviado Aprovado Em producao Entregue",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 9,
+        "title": "TS-09 Criar tabela de itens de ativacao configuravel sem alterar codigo",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 10,
+        "title": "TS-10 Tela de login e autenticacao SSO ou email corporativo",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 11,
+        "title": "TS-11 Tela home com botoes Fachada e Kit Frio e historico de solicitacoes",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 12,
+        "title": "TS-12 Fluxo completo de Fachada busca tipo checklist informacoes upload revisao envio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 13,
+        "title": "TS-13 Fluxo completo de Kit Frio busca solicitante itens quantidades revisao envio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 14,
+        "title": "TS-14 Tela de acompanhamento de solicitacoes com status e protocolo",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 15,
+        "title": "TS-15 Tela de backoffice para aprovacao rejeicao e atualizacao de status",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 16,
+        "title": "TS-16 Layout responsivo mobile e desktop",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 17,
+        "title": "TS-17 Busca de cliente por codigo com autofill nome nota RED cluster rota",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 18,
+        "title": "TS-18 Validacao de campos obrigatorios por fluxo fachada e kit frio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 19,
+        "title": "TS-19 Regra nota RED alerta ou bloqueio com justificativa",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 20,
+        "title": "TS-20 Geracao de numero de protocolo unico ao enviar solicitacao",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 21,
+        "title": "TS-21 Limites de quantidade por item Kit Frio configurados por tabela",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 22,
+        "title": "TS-22 Captura de geolocalizacao GPS no momento do envio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 23,
+        "title": "TS-23 Integracao com fonte de dados de clientes ERP CRM DW",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 24,
+        "title": "TS-24 Notificacao por e-mail ao enviar solicitacao para backoffice e solicitante",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 25,
+        "title": "TS-25 Notificacao automatica de mudanca de status para o solicitante",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 26,
+        "title": "TS-26 Dashboard analitico de solicitacoes por tipo status regiao cluster periodo",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 27,
+        "title": "TS-27 Teste UAT com promotores reais em campo piloto 2 a 3 usuarios",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 28,
+        "title": "TS-28 Teste de upload de arquivos grandes fotos alta resolucao celular",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 29,
+        "title": "TS-29 Documentacao de uso para promotores guia rapido PDF ou video",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      },
+      {
+        "id": 30,
+        "title": "TS-30 Rollout e monitoramento pos-lancamento primeiras 2 semanas",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781192952737
+      }
+    ],
+    "doing": [],
+    "done": [],
+    "debug": []
+  },
+  "createdAt": "2026-06-11T11:49:12.737223"
+}

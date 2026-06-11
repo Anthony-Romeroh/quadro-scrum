@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Board</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f8f6;
+    --bg2: #ffffff;
+    --bg3: #f1efe8;
+    --text: #1a1a18;
+    --text2: #5f5e5a;
+    --text3: #9a9994;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --blue: #185fa5; --blue-bg: #e6f1fb; --blue-text: #0c447c;
+    --green: #0f6e56; --green-bg: #e1f5ee; --green-text: #085041;
+    --red: #a32d2d; --red-bg: #fcebeb; --red-text: #791f1f;
+    --amber: #854f0b; --amber-bg: #faeeda; --amber-text: #633806;
+    --purple: #534ab7; --purple-bg: #eeedfe; --purple-text: #3c3489;
+    --gray-bg: #f1efe8; --gray-text: #444441;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18; --bg2: #222220; --bg3: #2a2a28;
+      --text: #e8e6dc; --text2: #9a9994; --text3: #6a6965;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --blue-bg: #0c447c; --blue-text: #b5d4f4;
+      --green-bg: #085041; --green-text: #9fe1cb;
+      --red-bg: #791f1f; --red-text: #f7c1c1;
+      --amber-bg: #633806; --amber-text: #fac775;
+      --purple-bg: #3c3489; --purple-text: #cecbf6;
+      --gray-bg: #444441; --gray-text: #d3d1c7;
+    }
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .top-left h1 { font-size: 18px; font-weight: 500; }
+  .top-left .sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .sprint-input { font-size: 18px; font-weight: 500; background: none; border: none; color: var(--text); outline: none; width: 300px; }
+  .sprint-input:focus { border-bottom: 1.5px solid var(--blue); }
+  .top-right { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font-size: 12px; padding: 6px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text2); cursor: pointer; transition: background .15s; }
+  .btn:hover { background: var(--bg3); }
+  .btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-primary:hover { opacity: .9; }
+
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .stat { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 6px 12px; font-size: 12px; color: var(--text2); }
+  .stat b { color: var(--text); font-weight: 500; }
+
+  .columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 768px) { .columns { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .columns { grid-template-columns: 1fr; } }
+
+  .col { background: var(--bg3); border-radius: var(--radius-lg); padding: 10px; min-height: 220px; transition: border .15s; }
+  .col.drag-over { border: 1.5px dashed var(--border2); }
+  .col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--border); }
+  .col-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+  .col-todo .col-title { color: var(--text2); }
+  .col-doing .col-title { color: var(--blue); }
+  .col-done .col-title { color: var(--green); }
+  .col-debug .col-title { color: var(--red); }
+  .col-badge { font-size: 11px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 99px; padding: 1px 7px; color: var(--text2); }
+
+  .cards { display: flex; flex-direction: column; gap: 6px; min-height: 50px; }
+
+  .card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: grab; transition: border-color .15s, opacity .15s; position: relative; }
+  .card:hover { border-color: var(--border2); }
+  .card.dragging { opacity: .35; cursor: grabbing; }
+  .col-debug .card { border-left: 2.5px solid var(--red); border-radius: 0 var(--radius) var(--radius) 0; }
+  .col-done .card { border-left: 2.5px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; }
+
+  .card-title { font-size: 12px; font-weight: 500; line-height: 1.4; margin-bottom: 6px; color: var(--text); }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 10px; padding: 1px 6px; border-radius: 99px; font-weight: 500; }
+  .tag-bundle { background: var(--purple-bg); color: var(--purple-text); }
+  .tag-git    { background: var(--amber-bg);  color: var(--amber-text); }
+  .tag-infra  { background: var(--red-bg);    color: var(--red-text); }
+  .tag-motor  { background: var(--green-bg);  color: var(--green-text); }
+  .tag-docs   { background: var(--blue-bg);   color: var(--blue-text); }
+
+  .card-time { font-size: 10px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+  .card-time.active { color: var(--blue); }
+  .card-actions { display: flex; gap: 4px; }
+  .card-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 13px; padding: 1px 3px; border-radius: 4px; }
+  .card-btn:hover { color: var(--text); background: var(--bg3); }
+
+  .time-log { margin-top: 6px; border-top: 0.5px solid var(--border); padding-top: 6px; display: none; }
+  .time-log.open { display: block; }
+  .time-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--text2); padding: 1px 0; }
+  .time-row .col-name { text-transform: capitalize; }
+  .time-edit { font-size: 10px; background: var(--bg3); border: 0.5px solid var(--border); border-radius: 4px; padding: 1px 4px; color: var(--text); width: 60px; }
+
+  .add-btn { width: 100%; margin-top: 8px; font-size: 11px; padding: 5px; border: 0.5px dashed var(--border); border-radius: var(--radius); background: none; color: var(--text3); cursor: pointer; text-align: center; }
+  .add-btn:hover { color: var(--text2); border-color: var(--border2); }
+  .add-form { margin-top: 8px; display: none; }
+  .add-form.open { display: block; }
+  .add-textarea { width: 100%; font-size: 12px; padding: 6px 8px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); resize: none; font-family: inherit; }
+  .add-textarea:focus { outline: none; border-color: var(--blue); }
+  .add-row { display: flex; gap: 6px; margin-top: 6px; }
+  .add-select { font-size: 11px; padding: 4px 6px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text2); }
+  .add-confirm { font-size: 11px; padding: 4px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); cursor: pointer; }
+  .add-confirm:hover { background: var(--bg3); }
+  .add-cancel { font-size: 11px; padding: 4px 8px; border: none; background: none; color: var(--text3); cursor: pointer; }
+
+  .empty { font-size: 11px; color: var(--text3); text-align: center; padding: 20px 0; }
+
+  .modal-wrap { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-wrap.open { display: flex; }
+  .modal { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 1.5rem; width: 90%; max-width: 680px; max-height: 80vh; overflow-y: auto; }
+  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .modal-close { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text2); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 6px 8px; font-weight: 500; color: var(--text2); border-bottom: 0.5px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  td { padding: 6px 8px; border-bottom: 0.5px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  .bar-wrap { background: var(--bg3); border-radius: 99px; height: 6px; width: 100%; }
+  .bar { height: 6px; border-radius: 99px; background: var(--blue); }
+  .bar.done { background: var(--green); }
+  .bar.debug { background: var(--red); }
+  .chart { margin-top: 1rem; }
+  .chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .chart-label { font-size: 11px; color: var(--text2); width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .chart-bar-wrap { flex: 1; background: var(--bg3); border-radius: 99px; height: 14px; }
+  .chart-bar { height: 14px; border-radius: 99px; background: var(--blue); min-width: 2px; transition: width .3s; }
+  .chart-val { font-size: 11px; color: var(--text2); width: 50px; text-align: right; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="top-left">
+      <input class="sprint-input" id="sprint-name" value="Bundle Roteirizacao - Sprint 1" placeholder="Nome da sprint...">
+      <div class="sub" id="sprint-dates"></div>
+    </div>
+    <div class="top-right">
+      <button class="btn" onclick="openReport()">&#9776; relatorio</button>
+      <button class="btn" onclick="exportJSON()">&#8595; exportar</button>
+      <button class="btn" onclick="document.getElementById('import-file').click()">&#8593; importar</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="btn btn-primary" onclick="clearAll()">&#43; nova sprint</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="columns">
+    <div class="col col-todo" id="col-todo" ondragover="dragOver(event)" ondrop="drop(event,'todo')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">a fazer</span><span class="col-badge" id="badge-todo">0</span></div>
+      <div class="cards" id="cards-todo"></div>
+      <div id="form-todo">
+        <button class="add-btn" onclick="showForm('todo')">+ nova task</button>
+        <div class="add-form" id="addform-todo">
+          <textarea class="add-textarea" id="inp-todo" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-todo"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('todo')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('todo')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-doing" id="col-doing" ondragover="dragOver(event)" ondrop="drop(event,'doing')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">fazendo</span><span class="col-badge" id="badge-doing">0</span></div>
+      <div class="cards" id="cards-doing"></div>
+      <div id="form-doing">
+        <button class="add-btn" onclick="showForm('doing')">+ nova task</button>
+        <div class="add-form" id="addform-doing">
+          <textarea class="add-textarea" id="inp-doing" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-doing"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('doing')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('doing')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-done" id="col-done" ondragover="dragOver(event)" ondrop="drop(event,'done')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">feito</span><span class="col-badge" id="badge-done">0</span></div>
+      <div class="cards" id="cards-done"></div>
+      <div id="form-done">
+        <button class="add-btn" onclick="showForm('done')">+ nova task</button>
+        <div class="add-form" id="addform-done">
+          <textarea class="add-textarea" id="inp-done" rows="2" placeholder="Descreve a task..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-done"><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-infra">infra</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('done')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('done')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-debug" id="col-debug" ondragover="dragOver(event)" ondrop="drop(event,'debug')" ondragleave="dragLeave(event)">
+      <div class="col-head"><span class="col-title">debug / erro</span><span class="col-badge" id="badge-debug">0</span></div>
+      <div class="cards" id="cards-debug"></div>
+      <div id="form-debug">
+        <button class="add-btn" onclick="showForm('debug')">+ novo erro</button>
+        <div class="add-form" id="addform-debug">
+          <textarea class="add-textarea" id="inp-debug" rows="2" placeholder="Descreve o erro..."></textarea>
+          <div class="add-row">
+            <select class="add-select" id="tag-debug"><option value="tag-infra">infra</option><option value="tag-bundle">bundle</option><option value="tag-git">git</option><option value="tag-motor">motor</option><option value="tag-docs">docs</option></select>
+            <button class="add-confirm" onclick="addCard('debug')">adicionar</button>
+            <button class="add-cancel" onclick="hideForm('debug')">cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="report-modal" onclick="if(event.target===this)closeReport()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeReport()">&#215;</button>
+    <h2>Relatorio da sprint</h2>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<script>
+const COLS = ['todo','doing','done','debug'];
+const COL_LABELS = {todo:'a fazer', doing:'fazendo', done:'feito', debug:'debug/erro'};
+let state = { sprint: '', cards: {todo:[], doing:[], done:[], debug:[]}, createdAt: new Date().toISOString() };
+let dragCardId = null;
+let dragSrcCol = null;
+let ticker = null;
+
+function now() { return Date.now(); }
+function ms2h(ms) { return Math.round(ms / 3600000 * 10) / 10; }
+function ms2str(ms) {
+  if (!ms || ms <= 0) return '—';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return h + 'h ' + m + 'm';
+  return m + 'm';
+}
+function totalTime(card) {
+  let total = 0;
+  const log = card.timeLog || {};
+  COLS.forEach(c => { total += (log[c] || 0); });
+  if (card.col === 'doing' && card.doingStart) total += (now() - card.doingStart);
+  return total;
+}
+
+function load() {
+  try {
+    const saved = localStorage.getItem('sprint-board-v2');
+    if (saved) state = JSON.parse(saved);
+  } catch(e) {}
+  document.getElementById('sprint-name').value = state.sprint || 'Sprint 1';
+  render();
+  startTicker();
+}
+
+function save() {
+  state.sprint = document.getElementById('sprint-name').value;
+  localStorage.setItem('sprint-board-v2', JSON.stringify(state));
+}
+
+function startTicker() {
+  if (ticker) clearInterval(ticker);
+  ticker = setInterval(() => {
+    document.querySelectorAll('.live-time').forEach(el => {
+      const id = parseInt(el.dataset.id);
+      const card = findCard(id);
+      if (card && card.col === 'doing' && card.doingStart) {
+        const elapsed = (now() - card.doingStart) + (card.timeLog && card.timeLog.doing ? card.timeLog.doing : 0);
+        el.textContent = ms2str(elapsed);
+      }
+    });
+  }, 30000);
+}
+
+function findCard(id) {
+  for (const col of COLS) {
+    const c = state.cards[col].find(x => x.id === id);
+    if (c) return {...c, col};
+  }
+  return null;
+}
+
+function render() {
+  COLS.forEach(col => {
+    const container = document.getElementById('cards-' + col);
+    container.innerHTML = '';
+    const list = state.cards[col] || [];
+    if (list.length === 0) {
+      container.innerHTML = '<div class="empty">vazio</div>';
+    } else {
+      list.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.draggable = true;
+        el.dataset.id = card.id;
+        const log = card.timeLog || {};
+        const isActive = col === 'doing' && card.doingStart;
+        const elapsed = isActive ? (now() - card.doingStart) + (log.doing || 0) : (log[col] || 0);
+        const total = totalTime({...card, col});
+        const timeStr = ms2str(elapsed > 0 ? elapsed : total);
+        const logRows = COLS.filter(c => (log[c] || 0) > 0 || (c === col && elapsed > 0)).map(c => {
+          const t = c === col && isActive ? elapsed : (log[c] || 0);
+          if (t <= 0) return '';
+          return `<div class="time-row"><span class="col-name">${COL_LABELS[c]}</span><input class="time-edit" type="text" value="${ms2str(t)}" onchange="editTime(${card.id},'${c}',this.value)" onclick="event.stopPropagation()"></div>`;
+        }).join('');
+        el.innerHTML = `
+          <div class="card-title">${card.title}</div>
+          <div class="card-footer">
+            <span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="card-time ${isActive ? 'active' : ''}" title="tempo nesta coluna">
+                &#9201; <span class="live-time" data-id="${card.id}">${timeStr}</span>
+              </span>
+              <div class="card-actions">
+                <button class="card-btn" onclick="toggleLog(${card.id})" title="ver historico de tempo">&#9776;</button>
+                <button class="card-btn" onclick="deleteCard(${card.id})" title="remover">&#215;</button>
+              </div>
+            </div>
+          </div>
+          <div class="time-log" id="log-${card.id}">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">historico de tempo (editavel)</div>
+            ${logRows || '<div style="font-size:10px;color:var(--text3)">sem registros</div>'}
+            <div class="time-row" style="margin-top:4px;border-top:0.5px solid var(--border);padding-top:4px">
+              <span style="font-weight:500">total</span>
+              <span style="font-weight:500">${ms2str(total)}</span>
+            </div>
+          </div>`;
+        el.addEventListener('dragstart', e => { dragCardId = card.id; dragSrcCol = col; el.classList.add('dragging'); });
+        el.addEventListener('dragend', () => el.classList.remove('dragging'));
+        container.appendChild(el);
+      });
+    }
+    document.getElementById('badge-' + col).textContent = list.length;
+  });
+  updateStats();
+  save();
+}
+
+function toggleLog(id) {
+  const el = document.getElementById('log-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function editTime(id, col, val) {
+  const card = state.cards[col] && state.cards[col].find(c => c.id === id);
+  if (!card) return;
+  const h = parseFloat(val);
+  if (!isNaN(h)) {
+    if (!card.timeLog) card.timeLog = {};
+    card.timeLog[col] = Math.round(h * 3600000);
+    save();
+  }
+}
+
+function updateStats() {
+  const total = COLS.reduce((s, c) => s + state.cards[c].length, 0);
+  const done = state.cards.done.length;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  const allTime = COLS.reduce((s, col) => {
+    return s + state.cards[col].reduce((ss, c) => ss + totalTime({...c, col}), 0);
+  }, 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat">total <b>${total}</b></div>
+    <div class="stat">feito <b>${done}</b></div>
+    <div class="stat">progresso <b>${pct}%</b></div>
+    <div class="stat">tempo total <b>${ms2str(allTime)}</b></div>
+    <div class="stat">debug <b>${state.cards.debug.length}</b></div>`;
+  const d = new Date(state.createdAt);
+  document.getElementById('sprint-dates').textContent = 'iniciada em ' + d.toLocaleDateString('pt-BR');
+}
+
+function addCard(col) {
+  const inp = document.getElementById('inp-' + col);
+  const tag = document.getElementById('tag-' + col).value;
+  const title = inp.value.trim();
+  if (!title) return;
+  const id = Date.now();
+  const card = { id, title, tag, timeLog: {}, createdAt: now() };
+  if (col === 'doing') card.doingStart = now();
+  state.cards[col].push(card);
+  inp.value = '';
+  hideForm(col);
+  render();
+}
+
+function deleteCard(id) {
+  if (!confirm('Remover esta task?')) return;
+  COLS.forEach(col => { state.cards[col] = state.cards[col].filter(c => c.id !== id); });
+  render();
+}
+
+function showForm(col) {
+  document.getElementById('addform-' + col).classList.add('open');
+  document.querySelector('#form-' + col + ' .add-btn').style.display = 'none';
+  document.getElementById('inp-' + col).focus();
+}
+
+function hideForm(col) {
+  document.getElementById('addform-' + col).classList.remove('open');
+  document.querySelector('#form-' + col + ' .add-btn').style.display = 'block';
+}
+
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+
+function drop(e, targetCol) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!dragCardId || dragSrcCol === targetCol) { dragCardId = null; dragSrcCol = null; return; }
+  const idx = state.cards[dragSrcCol].findIndex(c => c.id === dragCardId);
+  if (idx === -1) return;
+  const card = state.cards[dragSrcCol].splice(idx, 1)[0];
+  const t = now();
+  if (!card.timeLog) card.timeLog = {};
+  if (dragSrcCol === 'doing' && card.doingStart) {
+    card.timeLog.doing = (card.timeLog.doing || 0) + (t - card.doingStart);
+    delete card.doingStart;
+  }
+  if (targetCol === 'doing') card.doingStart = t;
+  if (!card.timeLog[dragSrcCol]) card.timeLog[dragSrcCol] = 0;
+  state.cards[targetCol].push(card);
+  dragCardId = null; dragSrcCol = null;
+  render();
+}
+
+function openReport() {
+  const allCards = COLS.flatMap(col => state.cards[col].map(c => ({...c, col})));
+  if (allCards.length === 0) { alert('Nenhuma task ainda.'); return; }
+  const maxTime = Math.max(...allCards.map(c => totalTime(c)), 1);
+  const rows = allCards.sort((a,b) => totalTime(b) - totalTime(a)).map(card => {
+    const t = totalTime(card);
+    const pct = Math.round(t / maxTime * 100);
+    const barClass = card.col === 'done' ? 'done' : card.col === 'debug' ? 'debug' : '';
+    const log = card.timeLog || {};
+    const breakdown = COLS.filter(c => (log[c]||0) > 0).map(c => `${COL_LABELS[c]}: ${ms2str(log[c])}`).join(' | ') || '—';
+    return `<tr>
+      <td>${card.title}</td>
+      <td><span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span></td>
+      <td><span class="tag" style="background:var(--bg3);color:var(--text2)">${COL_LABELS[card.col]}</span></td>
+      <td>${ms2str(t)}</td>
+      <td style="min-width:80px"><div class="bar-wrap"><div class="bar ${barClass}" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  const chartRows = allCards.sort((a,b) => totalTime(b) - totalTime(a)).slice(0,10).map(card => {
+    const t = totalTime(card);
+    const pct = Math.round(t / maxTime * 100);
+    return `<div class="chart-row">
+      <div class="chart-label" title="${card.title}">${card.title}</div>
+      <div class="chart-bar-wrap"><div class="chart-bar" style="width:${pct}%"></div></div>
+      <div class="chart-val">${ms2str(t)}</div>
+    </div>`;
+  }).join('');
+
+  const totalDone = state.cards.done.length;
+  const totalAll = COLS.reduce((s,c) => s + state.cards[c].length, 0);
+  const totalTime2 = COLS.reduce((s,col) => s + state.cards[col].reduce((ss,c) => ss + totalTime({...c,col}),0), 0);
+
+  document.getElementById('report-content').innerHTML = `
+    <div class="stats" style="margin-bottom:1rem">
+      <div class="stat">tasks <b>${totalAll}</b></div>
+      <div class="stat">concluidas <b>${totalDone}</b></div>
+      <div class="stat">tempo total <b>${ms2str(totalTime2)}</b></div>
+      <div class="stat">erros <b>${state.cards.debug.length}</b></div>
+    </div>
+    <div class="chart" style="margin-bottom:1.5rem">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">top 10 por tempo</div>
+      ${chartRows}
+    </div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">todas as tasks</div>
+    <table>
+      <thead><tr><th>task</th><th>tag</th><th>coluna</th><th>tempo total</th><th>proporcao</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  document.getElementById('report-modal').classList.add('open');
+}
+
+function closeReport() { document.getElementById('report-modal').classList.remove('open'); }
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sprint-board-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      state = JSON.parse(ev.target.result);
+      document.getElementById('sprint-name').value = state.sprint || 'Sprint 1';
+      render();
+    } catch { alert('Arquivo invalido.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Criar nova sprint? Os dados atuais serao perdidos.')) return;
+  state = { sprint: 'Nova sprint', cards: {todo:[], doing:[], done:[], debug:[]}, createdAt: new Date().toISOString() };
+  document.getElementById('sprint-name').value = 'Nova sprint';
+  render();
+}
+
+document.getElementById('sprint-name').addEventListener('input', save);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeReport();
+  if (e.key === 'Enter' && !e.shiftKey) {
+    COLS.forEach(col => {
+      const inp = document.getElementById('inp-' + col);
+      if (document.activeElement === inp) { e.preventDefault(); addCard(col); }
+    });
+  }
+});
+
+load();
+</script>
+<script>
+const COLS=['todo','doing','done','debug'];
+const COL_LABELS={todo:'a fazer',doing:'fazendo',done:'feito',debug:'debug/erro'};
+const ALL_SPRINTS=[{"sprint": "Bundle Roteirização", "cards": {"todo": [{"id": 1, "title": "Corrigir nome da branch para padrao anthonyhernandez_Bemol/feat-bundle-roteirizacao", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 2, "title": "Recriar branch a partir da dev sincronizada com a main", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 3, "title": "Adicionar roteirizacao = true no pyproject.toml", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 4, "title": "Abrir PR para dev com reviewer chefa", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 5, "title": "Linkar epico 266515 no PR", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 6, "title": "Validar catalogo inteligencia_negocios no Unity Catalog", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 7, "title": "Validar schema roterizacao no Unity Catalog", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 8, "title": "Aguardar aprovacao e deploy automatico via esteira CI/CD", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 9, "title": "Validar pipelines publicadas no Databricks apos deploy", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 10, "title": "Coordenar deploy com a PSW", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 11, "title": "Configurar schedule 10 min pausado apos deploy em prod", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 12, "title": "Aguardar e incorporar codigo definitivo do motor lat_log.py e motor.py", "tag": "tag-motor", "timeLog": {}, "createdAt": 1781192156563}, {"id": 13, "title": "Alinhar com Sabrina sobre status do software do motor", "tag": "tag-motor", "timeLog": {}, "createdAt": 1781192156563}, {"id": 14, "title": "Criar README.md do bundle roteirizacao", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192156563}, {"id": 15, "title": "Configurar git user.name e user.email", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 16, "title": "Verificar infraestrutura minima - catalogo, schemas, volumes (guia item 3.1)", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 17, "title": "Testar execucao das pipelines gold apos deploy (guia item 6.4)", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 18, "title": "Avaliar necessidade de tags no bundle (guia item 4.5)", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192156563}], "doing": [{"id": 19, "title": "Alinhar fluxo correto de deploy via CI/CD com chefa e consultoria", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}], "done": [{"id": 20, "title": "Instalar Databricks CLI v1.2.0 via extensao VS Code", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 21, "title": "Gerar token PAT com escopo all-apis e configurar autenticacao", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 22, "title": "Clonar repositorio Databricks-Mawe do Azure DevOps", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 23, "title": "Criar estrutura do bundle roteirizacao no repositorio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 24, "title": "Criar databricks.yml com targets dev e prod", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 25, "title": "Criar roteirizacao_ship_from_store.yml", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 26, "title": "Criar roteirizacao_ship_from_store_pendentes.yml", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 27, "title": "Criar roteirizacao_motor.yml placeholder serverless", "tag": "tag-motor", "timeLog": {}, "createdAt": 1781192156563}, {"id": 28, "title": "Incorporar notebooks gold ship_from_store.py e pendentes", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 29, "title": "bundle validate passou - Validation OK!", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 30, "title": "Mapear 9 tabelas fonte com pipeline de origem e frequencia", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192156563}, {"id": 31, "title": "Branch feat/bundle-roteirizacao criada e enviada para Azure DevOps", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 32, "title": "Deploy manual testado com sucesso - Deployment complete!", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 33, "title": "Deploy manual removido com bundle destroy", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 34, "title": "Validar arquitetura com chefa - bundle so gold confirmado", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 35, "title": "Definir computacao serverless com chefa - sem cluster policy", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}], "debug": [{"id": 36, "title": "Token PAT sem escopo all-apis bloqueava upload - resolvido com novo token", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192156563}, {"id": 37, "title": "Deploy feito direto do CLI local - nao segue padrao CI/CD do repositorio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192156563}, {"id": 38, "title": "Branch criada a partir da main em vez da dev", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}, {"id": 39, "title": "Nome da branch fora do padrao githubusername/tipo-descricao", "tag": "tag-git", "timeLog": {}, "createdAt": 1781192156563}]}, "createdAt": "2026-06-11T11:35:56.563923"}, {"sprint": "Print in House - Sprint 1", "cards": {"todo": [{"id": 1, "title": "TS-01 Definir tecnologia Power Apps ou Python depende licenca M365", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 2, "title": "TS-02 Mapear perfis de usuarios e permissoes promotor vendedor supervisor backoffice", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 3, "title": "TS-03 Definir fonte de dados dos clientes ERP CRM DW API ou tabela de origem", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 4, "title": "TS-04 Definir onde os dados serao armazenados Dataverse SharePoint SQL Delta Table", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 5, "title": "TS-05 Definir storage de arquivos fotos e logos Azure Blob SharePoint", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 6, "title": "TS-06 Modelar tabela de solicitacoes Fachada campos e schema", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 7, "title": "TS-07 Modelar tabela de solicitacoes Kit Frio campos e schema", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 8, "title": "TS-08 Definir ciclo de vida do status Rascunho Enviado Aprovado Em producao Entregue", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 9, "title": "TS-09 Criar tabela de itens de ativacao configuravel sem alterar codigo", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 10, "title": "TS-10 Tela de login e autenticacao SSO ou email corporativo", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 11, "title": "TS-11 Tela home com botoes Fachada e Kit Frio e historico de solicitacoes", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 12, "title": "TS-12 Fluxo completo de Fachada busca tipo checklist informacoes upload revisao envio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 13, "title": "TS-13 Fluxo completo de Kit Frio busca solicitante itens quantidades revisao envio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 14, "title": "TS-14 Tela de acompanhamento de solicitacoes com status e protocolo", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 15, "title": "TS-15 Tela de backoffice para aprovacao rejeicao e atualizacao de status", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 16, "title": "TS-16 Layout responsivo mobile e desktop", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 17, "title": "TS-17 Busca de cliente por codigo com autofill nome nota RED cluster rota", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 18, "title": "TS-18 Validacao de campos obrigatorios por fluxo fachada e kit frio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 19, "title": "TS-19 Regra nota RED alerta ou bloqueio com justificativa", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 20, "title": "TS-20 Geracao de numero de protocolo unico ao enviar solicitacao", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 21, "title": "TS-21 Limites de quantidade por item Kit Frio configurados por tabela", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 22, "title": "TS-22 Captura de geolocalizacao GPS no momento do envio", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 23, "title": "TS-23 Integracao com fonte de dados de clientes ERP CRM DW", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 24, "title": "TS-24 Notificacao por e-mail ao enviar solicitacao para backoffice e solicitante", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 25, "title": "TS-25 Notificacao automatica de mudanca de status para o solicitante", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 26, "title": "TS-26 Dashboard analitico de solicitacoes por tipo status regiao cluster periodo", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}, {"id": 27, "title": "TS-27 Teste UAT com promotores reais em campo piloto 2 a 3 usuarios", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 28, "title": "TS-28 Teste de upload de arquivos grandes fotos alta resolucao celular", "tag": "tag-bundle", "timeLog": {}, "createdAt": 1781192952737}, {"id": 29, "title": "TS-29 Documentacao de uso para promotores guia rapido PDF ou video", "tag": "tag-docs", "timeLog": {}, "createdAt": 1781192952737}, {"id": 30, "title": "TS-30 Rollout e monitoramento pos-lancamento primeiras 2 semanas", "tag": "tag-infra", "timeLog": {}, "createdAt": 1781192952737}], "doing": [], "done": [], "debug": []}, "createdAt": "2026-06-11T11:49:12.737223"}];
+let currentSprint=null;
+let dragCardId=null,dragSrcCol=null;
+
+function now(){return Date.now();}
+function ms2str(ms){if(!ms||ms<=0)return'—';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return h>0?h+'h '+m+'m':m+'m';}
+function totalTime(card){let t=0;const log=card.timeLog||{};COLS.forEach(c=>{t+=(log[c]||0);});return t;}
+
+function renderTabs(){
+  const sel=document.getElementById('sprint-selector');
+  sel.innerHTML='';
+  const all=document.createElement('button');
+  all.className='sprint-tab all'+(currentSprint===null?' active':'');
+  all.textContent='todas ('+ALL_SPRINTS.length+')';
+  all.onclick=()=>selectSprint(null);
+  sel.appendChild(all);
+  ALL_SPRINTS.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='sprint-tab'+(currentSprint===i?' active':'');
+    const d=s.createdAt?s.createdAt.slice(0,10):'';
+    btn.textContent=s.sprint+(d?' ('+d+')':'');
+    btn.onclick=()=>selectSprint(i);
+    sel.appendChild(btn);
+  });
+  document.getElementById('sprint-count').textContent=ALL_SPRINTS.length+' sprint(s)';
+}
+
+function selectSprint(idx){
+  currentSprint=idx;
+  renderTabs();
+  render();
+}
+
+function getCards(col){
+  if(currentSprint===null){
+    return ALL_SPRINTS.flatMap(s=>
+      (s.cards[col]||[]).map(c=>{
+        const tc=totalTime(c);
+        return{...c,_sprint:s.sprint,_tc:tc};
+      })
+    );
+  }
+  return (ALL_SPRINTS[currentSprint].cards[col]||[]).map(c=>{
+    const tc=totalTime(c);
+    return{...c,_sprint:ALL_SPRINTS[currentSprint].sprint,_tc:tc};
+  });
+}
+
+function render(){
+  const formCols=document.querySelectorAll('[id^="form-"]');
+  formCols.forEach(f=>f.style.display=currentSprint!==null?'block':'none');
+  COLS.forEach(col=>{
+    const container=document.getElementById('cards-'+col);
+    container.innerHTML='';
+    const list=getCards(col);
+    if(list.length===0){container.innerHTML='<div class="empty">vazio</div>';}
+    else{
+      list.forEach(card=>{
+        const el=document.createElement('div');
+        el.className='card';
+        el.draggable=currentSprint!==null;
+        el.dataset.id=card.id;
+        const t=card._tc;
+        const showSprint=currentSprint===null;
+        el.innerHTML=`<div class="card-title">${card.title}</div>
+          <div class="card-footer">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+              <span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span>
+              ${showSprint?`<span class="card-sprint">${card._sprint}</span>`:''}
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="card-time">&#9201; ${ms2str(t)}</span>
+              ${currentSprint!==null?`<button class="card-btn" onclick="deleteCard(${card.id},'${col}')" title="remover">&#215;</button>`:''}
+            </div>
+          </div>`;
+        if(currentSprint!==null){
+          el.addEventListener('dragstart',e=>{dragCardId=card.id;dragSrcCol=col;el.classList.add('dragging');});
+          el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+        }
+        container.appendChild(el);
+      });
+    }
+    document.getElementById('badge-'+col).textContent=list.length;
+  });
+  updateStats();
+}
+
+function updateStats(){
+  const cols=COLS.map(c=>getCards(c));
+  const total=cols.reduce((s,l)=>s+l.length,0);
+  const done=getCards('done').length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const allTime=cols.flat().reduce((s,c)=>s+c._tc,0);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat">total <b>${total}</b></div>
+    <div class="stat">feito <b>${done}</b></div>
+    <div class="stat">progresso <b>${pct}%</b></div>
+    <div class="stat">tempo total <b>${ms2str(allTime)}</b></div>
+    <div class="stat">debug <b>${getCards('debug').length}</b></div>`;
+}
+
+function addCard(col){
+  if(currentSprint===null)return;
+  const inp=document.getElementById('inp-'+col);
+  const tag=document.getElementById('tag-'+col).value;
+  const title=inp.value.trim();
+  if(!title)return;
+  const id=Date.now();
+  ALL_SPRINTS[currentSprint].cards[col].push({id,title,tag,timeLog:{},createdAt:now()});
+  inp.value='';hideForm(col);render();
+}
+
+function deleteCard(id,col){
+  if(currentSprint===null)return;
+  if(!confirm('Remover?'))return;
+  ALL_SPRINTS[currentSprint].cards[col]=ALL_SPRINTS[currentSprint].cards[col].filter(c=>c.id!==id);
+  render();
+}
+
+function showForm(col){document.getElementById('addform-'+col).classList.add('open');document.querySelector('#form-'+col+' .add-btn').style.display='none';document.getElementById('inp-'+col).focus();}
+function hideForm(col){document.getElementById('addform-'+col).classList.remove('open');document.querySelector('#form-'+col+' .add-btn').style.display='block';}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function dragLeave(e){e.currentTarget.classList.remove('drag-over');}
+function drop(e,targetCol){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(!dragCardId||dragSrcCol===targetCol||currentSprint===null){dragCardId=null;dragSrcCol=null;return;}
+  const idx=ALL_SPRINTS[currentSprint].cards[dragSrcCol].findIndex(c=>c.id===dragCardId);
+  if(idx===-1)return;
+  const card=ALL_SPRINTS[currentSprint].cards[dragSrcCol].splice(idx,1)[0];
+  const t=now();
+  if(!card.timeLog)card.timeLog={};
+  if(dragSrcCol==='doing'&&card.doingStart){card.timeLog.doing=(card.timeLog.doing||0)+(t-card.doingStart);delete card.doingStart;}
+  if(targetCol==='doing')card.doingStart=t;
+  ALL_SPRINTS[currentSprint].cards[targetCol].push(card);
+  dragCardId=null;dragSrcCol=null;render();
+}
+
+function openReport(){
+  const allCards=COLS.flatMap(col=>getCards(col).map(c=>{return{...c,col}}));
+  if(!allCards.length){alert('Nenhuma task.');return;}
+  const maxTime=Math.max(...allCards.map(c=>c._tc),1);
+
+  const overviewHTML=ALL_SPRINTS.map(s=>{
+    const total=COLS.reduce((x,c)=>x+(s.cards[c]||[]).length,0);
+    const done=(s.cards.done||[]).length;
+    const pct=total>0?Math.round(done/total*100):0;
+    return`<div class="overview-card"><h3>${s.sprint}</h3>
+      <div style="font-size:11px;color:var(--text2)">${done}/${total} concluidas — ${pct}%</div>
+      <div class="overview-bar"><div class="overview-bar-inner" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+
+  const rows=allCards.sort((a,b)=>b._tc-a._tc).map(card=>{
+    const pct=Math.round(card._tc/maxTime*100);
+    const barClass=card.col==='done'?'done':card.col==='debug'?'debug':'';
+    return`<tr><td>${card.title}</td><td><span class="tag ${card.tag}">${card.tag.replace('tag-','')}</span></td>
+      <td style="font-size:10px;color:var(--text2)">${card._sprint}</td>
+      <td>${COL_LABELS[card.col]}</td><td>${ms2str(card._tc)}</td>
+      <td style="min-width:80px"><div class="bar-wrap"><div class="bar ${barClass}" style="width:${pct}%"></div></div></td></tr>`;
+  }).join('');
+
+  const totalTime2=allCards.reduce((s,c)=>s+c._tc,0);
+  const totalDone=getCards('done').length;
+  const totalAll=allCards.length;
+
+  document.getElementById('report-content').innerHTML=`
+    <div class="stats" style="margin-bottom:1rem">
+      <div class="stat">tasks <b>${totalAll}</b></div>
+      <div class="stat">concluidas <b>${totalDone}</b></div>
+      <div class="stat">tempo total <b>${ms2str(totalTime2)}</b></div>
+      <div class="stat">sprints <b>${ALL_SPRINTS.length}</b></div>
+    </div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">resumo por sprint</div>
+    <div class="overview-grid" style="margin-bottom:1.5rem">${overviewHTML}</div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--text2)">todas as tasks</div>
+    <table><thead><tr><th>task</th><th>tag</th><th>sprint</th><th>coluna</th><th>tempo</th><th>proporcao</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  document.getElementById('report-modal').classList.add('open');
+}
+
+function closeReport(){document.getElementById('report-modal').classList.remove('open');}
+
+function exportSprint(){
+  const data=currentSprint!==null?ALL_SPRINTS[currentSprint]:{all:ALL_SPRINTS};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='sprint-export-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeReport();
+  if(e.key==='Enter'&&!e.shiftKey){
+    COLS.forEach(col=>{
+      const inp=document.getElementById('inp-'+col);
+      if(document.activeElement===inp){e.preventDefault();addCard(col);}
+    });
+  }
+});
+
+renderTabs();
+selectSprint(ALL_SPRINTS.length>0?ALL_SPRINTS.length-1:null);
+</script></body>
+</html>

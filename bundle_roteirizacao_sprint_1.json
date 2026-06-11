@@ -1,0 +1,287 @@
+{
+  "sprint": "Bundle Roteirizacao - Sprint 1",
+  "cards": {
+    "todo": [
+      {
+        "id": 1,
+        "title": "Corrigir nome da branch para padrao anthonyhernandez_Bemol/feat-bundle-roteirizacao",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 2,
+        "title": "Recriar branch a partir da dev sincronizada com a main",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 3,
+        "title": "Adicionar roteirizacao = true no pyproject.toml",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 4,
+        "title": "Abrir PR para dev com reviewer chefa",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 5,
+        "title": "Linkar epico 266515 no PR",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 6,
+        "title": "Validar catalogo inteligencia_negocios no Unity Catalog",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 7,
+        "title": "Validar schema roterizacao no Unity Catalog",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 8,
+        "title": "Aguardar aprovacao e deploy automatico via esteira CI/CD",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 9,
+        "title": "Validar pipelines publicadas no Databricks apos deploy",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 10,
+        "title": "Coordenar deploy com a PSW",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 11,
+        "title": "Configurar schedule 10 min pausado apos deploy em prod",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 12,
+        "title": "Aguardar e incorporar codigo definitivo do motor lat_log.py e motor.py",
+        "tag": "tag-motor",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 13,
+        "title": "Alinhar com Sabrina sobre status do software do motor",
+        "tag": "tag-motor",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 14,
+        "title": "Criar README.md do bundle roteirizacao",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 15,
+        "title": "Configurar git user.name e user.email",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 16,
+        "title": "Verificar infraestrutura minima - catalogo, schemas, volumes (guia item 3.1)",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 17,
+        "title": "Testar execucao das pipelines gold apos deploy (guia item 6.4)",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 18,
+        "title": "Avaliar necessidade de tags no bundle (guia item 4.5)",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      }
+    ],
+    "doing": [
+      {
+        "id": 19,
+        "title": "Alinhar fluxo correto de deploy via CI/CD com chefa e consultoria",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      }
+    ],
+    "done": [
+      {
+        "id": 20,
+        "title": "Instalar Databricks CLI v1.2.0 via extensao VS Code",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 21,
+        "title": "Gerar token PAT com escopo all-apis e configurar autenticacao",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 22,
+        "title": "Clonar repositorio Databricks-Mawe do Azure DevOps",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 23,
+        "title": "Criar estrutura do bundle roteirizacao no repositorio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 24,
+        "title": "Criar databricks.yml com targets dev e prod",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 25,
+        "title": "Criar roteirizacao_ship_from_store.yml",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 26,
+        "title": "Criar roteirizacao_ship_from_store_pendentes.yml",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 27,
+        "title": "Criar roteirizacao_motor.yml placeholder serverless",
+        "tag": "tag-motor",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 28,
+        "title": "Incorporar notebooks gold ship_from_store.py e pendentes",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 29,
+        "title": "bundle validate passou - Validation OK!",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 30,
+        "title": "Mapear 9 tabelas fonte com pipeline de origem e frequencia",
+        "tag": "tag-docs",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 31,
+        "title": "Branch feat/bundle-roteirizacao criada e enviada para Azure DevOps",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 32,
+        "title": "Deploy manual testado com sucesso - Deployment complete!",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 33,
+        "title": "Deploy manual removido com bundle destroy",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 34,
+        "title": "Validar arquitetura com chefa - bundle so gold confirmado",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 35,
+        "title": "Definir computacao serverless com chefa - sem cluster policy",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      }
+    ],
+    "debug": [
+      {
+        "id": 36,
+        "title": "Token PAT sem escopo all-apis bloqueava upload - resolvido com novo token",
+        "tag": "tag-infra",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 37,
+        "title": "Deploy feito direto do CLI local - nao segue padrao CI/CD do repositorio",
+        "tag": "tag-bundle",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 38,
+        "title": "Branch criada a partir da main em vez da dev",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      },
+      {
+        "id": 39,
+        "title": "Nome da branch fora do padrao githubusername/tipo-descricao",
+        "tag": "tag-git",
+        "timeLog": {},
+        "createdAt": 1781190655410
+      }
+    ]
+  },
+  "createdAt": "2026-06-11T15:10:55.410400"
+}
